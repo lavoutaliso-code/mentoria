@@ -1,0 +1,586 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Checklist Operação Fim de Ano — a pele.
+   Traço e cores vêm da peça da torneira: cinza #6F757B, laranja #FA6503.
+   Tipografia San Francisco (a do iPhone) — ver [[fontes-que-existem-na-chrome-dela]]:
+   só -apple-system e Georgia existem de verdade na Chrome dela.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --tinta:#0B0A08; --t2:#6E737A; --t3:#9AA0A7;
+  --laranja:#FA6503; --laranja2:#E25A02; --verde:#1F9D55; --verde2:#158345;
+  --traco:#6F757B; --ouro:#F2B01E;
+  --fundo:#F2F3F6; --cartao:#FFF; --linha:#E7E9ED; --noite:#101317;
+  --sf:-apple-system,'SF Pro Text',BlinkMacSystemFont,system-ui,sans-serif;
+  --sfd:-apple-system,'SF Pro Display',BlinkMacSystemFont,system-ui,sans-serif;
+  --sombra:0 1px 2px rgba(23,28,38,.04),0 24px 48px -30px rgba(23,28,38,.42);
+  --sombra2:0 2px 6px rgba(23,28,38,.05),0 40px 80px -44px rgba(23,28,38,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* ⚠️ [hidden] perde pra qualquer display: sem isto o fecho do checklist nasce
+   DESENHADO POR CIMA da pergunta. */
+[hidden]{display:none!important}
+/* ⚠️ `scroll-behavior:smooth` GLOBAL disputa com a rolagem do dedo no celular e
+   deixa a navegação pastosa. O suave fica só nos cliques da doca, por JS. */
+html{scroll-behavior:auto}
+body{background:var(--fundo);color:var(--tinta);font-family:var(--sf);
+  -webkit-font-smoothing:antialiased;letter-spacing:-.011em;
+  /* a página rola na vertical e NUNCA na horizontal */
+  overflow-x:hidden}
+img,svg{display:block;max-width:100%}
+b{font-weight:600}
+i{font-style:normal;color:var(--laranja)}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   A DOCA — fixa no RODAPÉ, com símbolo e nome. Sem número: a página não é uma
+   fila de etapas, é um lugar com quatro cômodos.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{--doca:62px}
+/* ⚠️ A DOCA TREMIA AO ROLAR. Três causas, medidas:
+   1. `backdrop-filter:blur(16px)` obriga o navegador a repintar o desfoque a
+      CADA quadro da rolagem — no celular isso treme. Fundo sólido não repinta.
+   2. Sem camada própria, ela era repintada junto com a página. `translateZ(0)`
+      + `will-change` a promovem a camada de composição: a rolagem passa por
+      baixo sem tocar nela.
+   3. `contain:paint` impede que o que está dentro force repintura de fora. */
+.doca{position:fixed;bottom:0;left:0;right:0;z-index:60;display:flex;
+  background:#fff;border-top:1px solid var(--linha);
+  padding-bottom:env(safe-area-inset-bottom,0);
+  transform:translateZ(0);will-change:transform;contain:paint;
+  backface-visibility:hidden}
+.doca a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:9px 2px 8px;text-decoration:none;color:#A9AFB7;
+  font-size:10px;font-weight:600;letter-spacing:-.005em;
+  /* transição curta: com .22s a cor ainda estava mudando quando a próxima
+     troca chegava, e a barra parecia piscar sem parar */
+  transition:color .12s linear}
+.doca a svg{width:23px;height:23px;flex:0 0 auto}
+.doca a.on{color:var(--laranja)}
+.doca a.feito{color:var(--verde)}
+
+/* o rótulo da parte, no topo de cada tela */
+.parte{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--t3);text-align:center}
+/* a tarja preta que abre a página: o nome da operação, de borda a borda */
+/* ⚠️ `width:100vw` + `margin-left:calc(50% - 50vw)` brigava com o padding da
+   seção: a tarja saía 8px fora de centro e sobrava branco de um lado. A seção
+   perde o padding lateral e quem recua são os FILHOS. */
+.tarja-topo{flex:0 0 auto;width:100%;
+  background:var(--tinta);color:#fff;text-align:center;
+  padding:clamp(16px,2.8vh,26px) 16px clamp(15px,2.4vh,22px)}
+.tarja-topo h1{font-family:var(--sfd);font-weight:700;
+  font-size:clamp(26px,5vh,38px);line-height:.98;letter-spacing:-.036em;
+  text-transform:uppercase}
+.tarja-topo h1 i{color:#FF9A54;font-style:normal}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ⚠️ O TÍTULO É O TOPO DA TELA, e é IGUAL em todas: linha escura + linha
+   laranja, no molde do «Calculadora / de precificação». Nada de tarja numa
+   tela e etiqueta noutra — um molde só.
+   ══════════════════════════════════════════════════════════════════════════ */
+.topo-tela{flex:0 0 auto;width:100%;text-align:center;
+  padding:clamp(14px,2.4vh,24px) 14px clamp(12px,2vh,20px)}
+.titulao{font-family:var(--sfd);font-weight:700;letter-spacing:-.04em;line-height:1.02;
+  font-size:clamp(28px,5.8vw,46px);text-transform:none;text-align:center;color:#2F343A}
+.titulao i{color:var(--laranja);font-style:normal}
+.titulao.claro{color:#fff}
+.titulao.claro i{color:#FF9A54}
+.sub{font-size:clamp(13px,1.9vh,15.5px);color:var(--t2);line-height:1.45;text-align:center;
+  margin-top:10px;max-width:34ch;margin-left:auto;margin-right:auto}
+
+.tela{min-height:100svh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;
+  padding:clamp(14px,2.6vh,28px) clamp(14px,3vw,40px)
+          calc(var(--doca) + clamp(14px,2.6vh,30px));
+    /* ⚠️ o padding-top JÁ reserva a marca; com `scroll-margin-top` também a
+     reservando, os dois somavam e a folha entrava 34px por baixo da doca. */
+  gap:clamp(12px,2.4vh,26px);scroll-margin-top:0}
+/* ⚠️ TENTEI `content-visibility:auto` aqui e MEDI: não deu ganho nenhum de fps
+   (34,5 contra 34,6) e piorou o pior quadro — de 67ms pra 103ms, porque a seção
+   inteira tem que ser renderizada de uma vez quando entra na tela. Retirado. */
+.tela.claro{background:#FFF}
+.tela.escuro{background:var(--noite);color:#fff}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   1 · AULÃO GRATUITO — arquitetura D2 (aprovada): card laranja arredondado,
+   vídeo 16:9 INTEIRO dentro dele e o botão de play NA TELA do vídeo.
+   ══════════════════════════════════════════════════════════════════════════ */
+#sec-aulao{background:#FBFBFC}
+/* ⚠️ O AULÃO NÃO PRECISA DE TELA INTEIRA. Com `min-height:100svh` sobrava meia
+   tela de branco embaixo do botão, porque um vídeo 16:9 é baixo. A seção passa
+   a ter a altura do conteúdo. */
+#sec-aulao{min-height:0;padding-top:0;padding-inline:0}
+#sec-aulao .topo-tela,#sec-aulao .aulao{padding-inline:16px}
+.aulao{width:min(560px,100%);flex:0 0 auto;
+  display:flex;flex-direction:column;gap:clamp(13px,2.2vh,22px)}
+.aulao-alto{flex:0 0 auto;text-align:center}
+
+.aulao-card{flex:0 1 auto;min-height:0;background:linear-gradient(135deg,#FF8A3D,#FA6503);
+  border-radius:26px;padding:clamp(13px,2vh,18px) clamp(12px,2.4vw,16px) clamp(15px,2.2vh,20px);
+  display:flex;flex-direction:column;align-items:center;gap:clamp(11px,1.8vh,15px);
+  box-shadow:0 20px 48px -24px rgba(167,64,0,.75)}
+/* o vídeo mantém o formato ORIGINAL 16:9 — nunca `cover` */
+/* ⚠️ ISTO CHAMAVA-SE `.quadro` — o MESMO nome do quadro do antes/depois. O
+   `aspect-ratio:16/9` daqui esmagava aqueles cards e cortava o chão, as pilhas
+   e o lucro líquido. Nome próprio resolve. */
+.telinha{position:relative;width:100%;aspect-ratio:16/9;background:#000;
+  border-radius:16px;overflow:hidden;box-shadow:0 14px 32px -18px rgba(70,26,0,.7)}
+.telinha video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+/* ⚠️ O PLAY FICA NA TELA DO VÍDEO, não acima dele. Some ao tocar. */
+.play{position:absolute;inset:0;z-index:2;display:grid;place-items:center;border:0;
+  background:rgba(0,0,0,.28);cursor:pointer;transition:opacity .25s}
+.play i{width:62px;height:62px;border-radius:999px;background:#fff;display:grid;
+  place-items:center;box-shadow:0 10px 26px -10px rgba(0,0,0,.8)}
+.play svg{width:24px;height:24px;margin-left:3px;fill:var(--laranja)}
+.telinha.tocando .play{opacity:0;pointer-events:none}
+/* ══════ A BARRA DA AULA — copiada da VSL da anamnese ══════
+   ⛔ 02/11 — ANTES AQUI MORAVA UM PAINEL PRÓPRIO (pausa · velocidade · ampliar
+   numa pílula flutuante) e ela REPROVOU: *«a tela que aumenta e acelera estão
+   tampando o vídeo»*. O molde passa a ser o da VSL: controles NATIVOS, que somem
+   sozinhos e já trazem velocidade e tela cheia, e só esta barra fina colada na
+   borda de baixo — 4px, nunca por cima da imagem.
+   A camada clara é o que JÁ BAIXOU; a laranja é onde a aula está. */
+.barra-aula{position:absolute;z-index:3;left:0;right:0;bottom:0;height:4px;
+  background:rgba(255,255,255,.18);pointer-events:none}
+.barra-aula b,.barra-aula i{position:absolute;left:0;top:0;height:100%;width:0;display:block}
+.barra-aula b{background:rgba(255,255,255,.38)}
+.barra-aula i{background:linear-gradient(90deg,#FF9A54,#FA6503)}
+/* antes do play não há o que mostrar */
+.telinha:not(.tocando) .barra-aula{opacity:0}
+
+.aulao-card p{font-size:13px;color:rgba(255,255,255,.95);line-height:1.5;max-width:32ch;
+  text-align:center}
+.duracao{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;
+  color:rgba(255,255,255,.82)!important;margin-top:-5px}
+.duracao[hidden]{display:none}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   2 · CHECKLIST — arquitetura A1 (aprovada): TARJA preta com o título, o CANO
+   no painel fixo logo abaixo e a pergunta trocando por baixo dele.
+   ══════════════════════════════════════════════════════════════════════════ */
+.folha{width:min(560px,100%);height:calc(100svh - var(--doca));
+  background:var(--cartao);box-shadow:var(--sombra2);position:relative;
+  display:flex;flex-direction:column;overflow:hidden}
+
+/* a tarja: branco sobre preto, de borda a borda */
+/* na folha do checklist o título fica no topo, com um fio que o separa */
+.folha .topo-tela{border-bottom:1px solid var(--linha)}
+
+/* o painel: o cano mora aqui em cima, sempre à vista */
+.painel{flex:0 0 auto;background:#fff;border-bottom:1px solid var(--linha);
+  padding:10px 14px 9px;z-index:2;display:flex;flex-direction:column;gap:6px;
+  box-shadow:0 10px 24px -22px rgba(23,28,38,.6)}
+.painel .alto{display:flex;align-items:center;justify-content:space-between;
+  font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);font-weight:700}
+.painel .alto b{color:var(--laranja);font-family:var(--sfd);font-size:16px}
+#cano{width:100%;height:auto;aspect-ratio:1040/440;display:block}
+
+.pass{display:flex;gap:6px}
+.pass i{flex:1;height:6px;border-radius:999px;background:#E7E9ED;transition:background .32s}
+.pass i.ok{background:var(--verde)} .pass i.furou{background:var(--laranja)}
+.pass i.agora{background:var(--tinta)}
+.falta{font-size:11px;color:var(--t3);text-align:center;letter-spacing:-.01em;min-height:14px}
+.falta.pronta{color:var(--laranja);font-weight:600}
+.aviso{text-align:center;font-size:11.5px;color:var(--laranja);font-weight:600;
+  min-height:0;letter-spacing:-.012em}
+.aviso:empty{display:none}
+
+/* a pergunta da vez */
+/* ⚠️ com `justify-content:center` e conteúdo maior que a caixa, o excesso sai
+   pra CIMA — a pergunta ficava decepada por trás do painel. `auto` nas margens
+   centraliza sem transbordar, e o rolo é a saída quando a tela é curta. */
+.miolo{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;
+  align-items:center;gap:clamp(10px,2vh,20px);
+  text-align:center;padding:clamp(10px,2vh,20px) 14px clamp(12px,2.2vh,20px)}
+.miolo>:first-child{margin-top:auto} .miolo>:last-child{margin-bottom:auto}
+/* a contagem da pergunta: miúda, discreta e COM AR até a pergunta */
+.cat{display:inline-block;font-family:var(--sfd);font-size:12.5px;font-weight:700;
+  letter-spacing:.02em;color:var(--laranja);border:1.6px solid rgba(250,101,3,.28);
+  border-radius:999px;padding:5px 13px;flex:0 0 auto;
+  margin-bottom:clamp(10px,2.2vh,22px)}
+.perg{font-family:var(--sfd);font-weight:700;font-size:clamp(19px,3.2vh,26px);
+  line-height:1.14;letter-spacing:-.034em;flex:0 0 auto;max-width:24ch}
+
+/* ⚠️ imagem em caixa POSICIONADA: `max-height:100%` não limita nada em flex item
+   sem altura resolvida — a ilustração subia por cima da pergunta. */
+.arte{flex:1 1 auto;min-height:clamp(74px,12vh,180px);width:100%;position:relative}
+.arte img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+
+.ops{flex:0 0 auto;display:grid;gap:9px;width:100%}
+.op{display:flex;align-items:center;gap:11px;background:#fff;border:1.8px solid var(--linha);
+  border-radius:16px;padding:12px 13px;cursor:pointer;text-align:left;font-family:var(--sf);
+  transition:border-color .16s,background .16s,transform .14s}
+.op:active{transform:scale(.99)}
+/* ⚠️ CHECK E X PREENCHIDOS: disco cheio na cor, sinal branco por dentro. */
+.mk{width:26px;height:26px;border-radius:999px;display:grid;place-items:center;flex:0 0 auto}
+.mk svg{width:58%;height:58%;stroke:#fff;stroke-width:3.4;fill:none;
+  stroke-linecap:round;stroke-linejoin:round}
+.op.sim .mk{background:var(--verde)} .op.nao .mk{background:var(--laranja)}
+/* ⚠️ `.mk` é display:grid; sem flex no pai, o disco e a palavra EMPILHAM. */
+.rotulo{display:flex;align-items:center;gap:10px;flex:0 0 auto;
+  font-family:var(--sfd);font-weight:700;font-size:16px}
+.op.sim .rotulo{color:var(--verde2)} .op.nao .rotulo{color:var(--laranja2)}
+.diz{font-size:13px;color:var(--t2);line-height:1.25;flex:1}
+.op .art{flex:0 0 auto}
+.op .art img{height:44px;width:auto}
+.op.sim.on{border-color:var(--verde);background:#F4FBF7}
+.op.nao.on{border-color:var(--laranja);background:#FFF8F3}
+
+/* os botões do card */
+.rolar{margin-top:4px;border:0;border-radius:999px;background:var(--tinta);color:#fff;
+  font-family:var(--sf);font-weight:600;font-size:15px;letter-spacing:-.015em;
+  padding:13px 22px;display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+  box-shadow:0 14px 28px -18px rgba(11,10,8,.9)}
+.rolar svg{width:17px;height:17px}
+@keyframes sobe{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ═══════════ 1b · O CARD PRA PRINTAR ═══════════ */
+.card-caixa{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
+.card-moldura{width:min(420px,88vw);border-radius:22px;overflow:hidden;
+  box-shadow:var(--sombra2);background:#fff}
+.card-moldura svg{width:100%;height:auto;display:block}
+.card-acoes{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.rolar.fantasma{background:#fff;color:var(--tinta);border:1.6px solid var(--linha);
+  box-shadow:none}
+.rolar.fantasma:hover{border-color:#C7CDD5}
+
+/* ═══════════ faixas de texto ═══════════ */
+.faixa{text-align:center;max-width:62ch}
+.etiqueta{display:inline-block;font-size:11.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.11em;color:var(--laranja);border:1.5px solid rgba(250,101,3,.3);
+  border-radius:999px;padding:6px 14px;margin-bottom:18px}
+.etiqueta.clara{color:#FFB469;border-color:rgba(255,180,105,.35)}
+.faixa h2{font-family:var(--sfd);font-weight:700;font-size:clamp(24px,4.4vh,44px);
+  letter-spacing:-.038em;line-height:1.06}
+.faixa p{color:var(--t2);font-size:clamp(13.5px,2vh,18px);margin-top:14px;line-height:1.5}
+.escuro .faixa p{color:#9BA2AC}
+
+/* ═══════════ 2 · CALCULADORA ═══════════ */
+.aparelho{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%}
+/* ⚠️ 02/11 — O MOCKUP ESTAVA PRESO EM 360px. O `min(360px,92vw)` fazia o teto de
+   360 vencer em QUALQUER tela a partir de 392px: num iPhone de 430 sobravam 70px
+   de lado sem uso e a calculadora rodava escalada a 0,88. Agora ele acompanha a
+   largura da tela, e a seção abre mão do respiro lateral pra isso. */
+/* ⚠️ E `flex:0 0 auto` NÃO É ENFEITE: sem ele o flex da coluna espremia o
+   aparelho pela ALTURA pra caber na tela, e o mockup CAIU pra 288px — menor do
+   que era. Medido: 288 contra 374. A seção pode passar da altura da tela; o que
+   ela não pode é encolher o aparelho. */
+#sec-calc{padding-inline:8px}
+/* ⚠️ E O TETO DE ALTURA tem que existir: com 374px de largura o aparelho ficava
+   748 de altura e os últimos 69px entravam POR BAIXO da doca — o pé da
+   calculadora sumia. Com `aspect-ratio`, limitar a altura encolhe a largura na
+   mesma proporção, então ele cresce até o limite da tela e para ali. */
+/* ⚠️ MEDIDO: `width` + `max-height` juntos DEFORMAM o aparelho — ele ficou
+   374×678, que não é proporção de iPhone (390/780), e a calculadora de dentro
+   passava 58px do fundo da lente: o botão «Calcular meu preço» era cortado.
+   Mandar na ALTURA e deixar a largura sair da proporção resolve os dois.
+
+   ⛔ E A ALTURA NÃO PODE VIR DE `svh`. Medido em 02/11: quando o TECLADO do
+   celular abre, o navegador encolhe a altura da janela — e com a conta em CSS o
+   aparelho inteiro encolhia junto, de 339px para 177px. É isso que fazia o botão
+   «Continuar» SUMIR E APARECER enquanto ela digitava o procedimento.
+   Agora quem calcula é o `pagina.js`, UMA vez, e só refaz a conta quando a
+   LARGURA muda (girar o aparelho). Teclado abrindo não mexe mais em nada. */
+.moldura{flex:0 0 auto;
+  height:var(--molh,678px);
+  width:auto;aspect-ratio:390/780;
+  background:#0B0A08;border-radius:clamp(30px,6vw,44px);padding:8px;
+  box-shadow:0 2px 4px rgba(0,0,0,.3),0 50px 90px -50px rgba(0,0,0,.85);position:relative}
+/* ⚠️ a ilha do iPhone TAPAVA o título da calculadora, que foi desenhada sem
+   notch. Decoração que come conteúdo sai. */
+/* a lente recorta; o iframe dentro dela tem o tamanho REAL e é escalado */
+.lente{position:absolute;inset:8px;overflow:hidden;border-radius:clamp(23px,5vw,36px);
+  background:#fff}
+.moldura iframe{width:390px;height:780px;border:0;display:block;
+  transform-origin:0 0;transform:scale(var(--esc,1))}
+.controles{display:flex;align-items:center;gap:14px}
+.controles button{width:42px;height:42px;border-radius:999px;border:1.6px solid var(--linha);
+  background:#fff;font-size:21px;color:var(--tinta);cursor:pointer;line-height:1;
+  display:grid;place-items:center;transition:border-color .16s,transform .14s}
+.controles button:hover:not(:disabled){border-color:#C7CDD5;transform:translateY(-1px)}
+.controles button:disabled{opacity:.3;cursor:default}
+.rot{font-size:13.5px;color:var(--t2);min-width:13ch;text-align:center;letter-spacing:-.015em}
+/* ⛔ 02/11 — `.nota` (a legenda sob o aparelho) saiu da tela por ordem dela. */
+
+/* ═══════════ 3 · ANTES → DEPOIS ═══════════ */
+/* ⚠️ CAIXA LARGA E BAIXA ESMAGA A PEÇA. O motor dimensiona o braço pela MENOR
+   folga, então num quadro 600×215 o braço caía pra 30px: cano fino, lucro
+   líquido do tamanho de uma formiga e queda nenhuma. Quadro mais estreito e
+   mais alto devolve o tamanho — é o que faz a moeda ter de onde cair. */
+/* ⚠️ `align-items:center` num grid cuja linha é menor que o conteúdo COMPRIME o
+   quadro: o card cortava o chão, as pilhas e o lucro líquido. `start` deixa cada
+   quadro com a altura que precisa e a seção rola. */
+/* ⚠️ o `.duo` é flex item da tela: sem `flex:0 0 auto` ele ENCOLHE junto e o
+   quadro corta o desenho por baixo (medido: quadro 201px pra um SVG de 202). */
+.duo{flex:0 0 auto;display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(10px,1.6vw,22px);
+  align-items:start;width:min(1020px,100%)}
+
+.quadro{flex:0 0 auto;background:#fff;border:1.6px solid var(--linha);border-radius:clamp(16px,2vw,24px);
+  padding:clamp(12px,1.8vh,20px);box-shadow:var(--sombra);display:flex;flex-direction:column;
+  gap:10px;min-width:0;height:auto}
+.quadro figcaption{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  font-size:clamp(12px,1.7vh,14.5px);font-weight:600;color:var(--t2);letter-spacing:-.018em}
+.tag{flex:0 0 auto;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#fff;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.tag-x{background:var(--laranja)} .tag-v{background:var(--verde)}
+/* ⚠️ o quadro é flex column: sem `flex:0 0 auto` o SVG ENCOLHE pra caber e a
+   torneira vira um fiapo no meio do card (medido: 84px no lugar de 202). */
+.quadro svg{width:100%;height:auto;aspect-ratio:1060/660;flex:0 0 auto}
+.legenda{font-size:clamp(12px,1.7vh,15px);color:var(--t2);letter-spacing:-.018em;line-height:1.35}
+.legenda b{font-family:var(--sfd);font-size:1.22em;color:var(--tinta)}
+.ruim .legenda b{color:var(--laranja)} .bom .legenda b{color:var(--verde)}
+.seta{color:var(--t3)} .seta svg{width:clamp(34px,4vw,54px)}
+
+/* ═══════════ 4 · MENTORIA ═══════════ */
+.oferta{width:min(640px,100%);text-align:center;display:flex;flex-direction:column;
+  align-items:center;gap:clamp(20px,3.2vh,32px)}
+.oferta h2{font-family:var(--sfd);font-weight:700;font-size:clamp(26px,4.8vh,48px);
+  letter-spacing:-.038em;line-height:1.05}
+.oferta h2 i{color:#FF8A3D}
+
+/* ⚠️ ANIMAR `box-shadow` REPINTA A CADA QUADRO. Com a página toda rolando num
+   celular, isso rouba o quadro da rolagem. O halo virou um pseudo-elemento que
+   só anima `transform` e `opacity` — a GPU resolve, sem repintura. */
+.etiqueta.viva{position:relative;color:#fff;background:#E5484D;border-color:#E5484D;
+  margin-bottom:22px}
+.etiqueta.viva::after{content:'';position:absolute;inset:0;border-radius:999px;
+  border:2px solid rgba(229,72,77,.55);pointer-events:none;
+  animation:respira 1.8s ease-out infinite;will-change:transform,opacity}
+@keyframes respira{0%{transform:scale(1);opacity:.7}
+  70%,100%{transform:scale(1.22);opacity:0}}
+
+/* ═══ o preço: é o que tem que pegar o olho primeiro ═══ */
+/* o padding de cima é maior: o selo −50% cavalga a borda e comia o «de R$ 1.997» */
+.preco{position:relative;width:100%;border-radius:22px;
+  padding:clamp(26px,3.6vh,36px) 20px clamp(16px,2.4vh,24px);
+  background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.04));
+  border:1px solid rgba(255,255,255,.16);text-align:center}
+.selo-off{position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,#FF8A3D,#FA6503);color:#fff;font-family:var(--sfd);
+  font-weight:700;font-size:15px;letter-spacing:-.01em;border-radius:999px;padding:6px 16px;
+  box-shadow:0 10px 24px -12px rgba(250,101,3,1)}
+.de{font-size:clamp(13px,1.9vh,16px);color:#8E96A1;margin-top:4px}
+.de s{text-decoration-thickness:2px;text-decoration-color:#E5484D}
+.por{display:flex;align-items:flex-start;justify-content:center;gap:6px;
+  margin:4px 0 2px;color:#fff}
+.por .moeda{font-family:var(--sfd);font-weight:700;font-size:clamp(18px,2.6vh,26px);
+  margin-top:clamp(8px,1.4vh,16px)}
+.por b{font-family:var(--sfd);font-weight:700;font-size:clamp(58px,10vh,104px);line-height:.92;
+  letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.parcela{font-size:clamp(14px,2.1vh,19px);color:#D7DBE1;letter-spacing:-.02em}
+.parcela b{color:#FFB469;font-weight:700}
+.fonte{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);
+  font-size:12px;color:#848C97;line-height:1.45;letter-spacing:-.005em}
+.fonte b{color:#B9C0C9}
+
+/* ⛔ 02/11 — as regras do termômetro de vagas (.termo/.barra/.termo-pe) saíram
+   junto com o bloco. Ver a nota no pagina.js. */
+
+/* o que ela leva — é isto que justifica o preço, então vem ANTES dele */
+.leva-tit{font-family:var(--sfd);font-weight:700;font-size:clamp(16px,2.3vh,20px);
+  letter-spacing:-.025em;color:#fff;align-self:flex-start;margin-bottom:-10px}
+.leva{list-style:none;width:100%;display:grid;gap:9px;text-align:left}
+.leva li{display:flex;align-items:flex-start;gap:12px;
+  background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);
+  border-radius:15px;padding:13px 15px}
+.leva li svg{width:23px;height:23px;flex:0 0 auto;color:#FF9A54;margin-top:1px}
+.leva li p{display:flex;flex-direction:column;gap:2px;min-width:0}
+.leva li b{color:#fff;font-weight:700;font-size:clamp(14px,2vh,16.5px);letter-spacing:-.022em;
+  line-height:1.25}
+.leva li span{color:#9BA2AC;font-size:clamp(12.5px,1.75vh,14px);line-height:1.3;
+  letter-spacing:-.012em}
+.leva li.premio{background:rgba(250,101,3,.12);border-color:rgba(250,101,3,.32)}
+.leva li.premio svg{color:#FFB469}
+
+.bonus{display:flex;align-items:center;gap:13px;text-align:left;
+  background:rgba(250,101,3,.11);border:1px solid rgba(250,101,3,.28);
+  border-radius:16px;padding:clamp(12px,1.8vh,17px) clamp(13px,2vw,19px);width:100%}
+.bonus svg{width:26px;height:26px;flex:0 0 auto;color:#FF9A54}
+.bonus p{font-size:clamp(13px,1.8vh,15.5px);color:#E7EAEE;line-height:1.4;letter-spacing:-.015em}
+.bonus b{color:#fff;font-weight:700}
+
+/* ⚠️ O BOTÃO PISCA — é o último elemento da página e tem que puxar o olho. */
+/* ⚠️ É O ÚLTIMO ELEMENTO DA PÁGINA E TEM QUE GRITAR: pulso de luz, brilho que
+   atravessa e o degradê andando. */
+/* ⚠️ fora da tela, animação nenhuma: `parado` é posto por JS quando a seção
+   sai do campo de visão. */
+.parado,.parado *{animation-play-state:paused!important}
+.cta{position:relative;overflow:hidden;width:100%;display:flex;flex-direction:column;
+  align-items:center;gap:4px;border-radius:22px;
+  padding:clamp(19px,3vh,28px) 20px;text-decoration:none;color:#fff;
+  background:linear-gradient(100deg,#FF9A54,#FA6503,#E5484D,#FA6503,#FF9A54);
+  background-size:300% 100%;
+  font-family:var(--sfd);font-weight:700;letter-spacing:-.028em;
+  animation:corre 6s linear infinite;
+  transition:transform .16s}
+/* o pulso do botão: anel em transform/opacity, não box-shadow */
+.cta::before{content:'';position:absolute;inset:0;border-radius:22px;
+  border:2.5px solid rgba(250,101,3,.5);pointer-events:none;z-index:0;
+  animation:pisca 1.5s ease-out infinite;will-change:transform,opacity}
+.cta span{font-size:clamp(22px,3.6vh,34px);line-height:1.04;position:relative;z-index:1}
+.cta small{font-family:var(--sfd);font-weight:700;font-size:clamp(14px,2.2vh,20px);
+  letter-spacing:-.02em;position:relative;z-index:1;
+  text-transform:uppercase;opacity:.97}
+/* ⚠️ o brilho animava `left` — isso é LAYOUT, recalculado a cada quadro. Virou
+   `transform`, que não toca no layout. */
+.cta::after{content:'';position:absolute;top:-60%;left:0;width:28%;height:220%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+  animation:brilho 2.6s ease-in-out infinite;will-change:transform}
+.cta:hover{transform:translateY(-2px) scale(1.012)}
+@keyframes pisca{0%{transform:scale(1);opacity:.75} 70%,100%{transform:scale(1.07);opacity:0}}
+@keyframes corre{to{background-position:300% 0}}
+@keyframes brilho{0%{transform:translateX(-160%) rotate(14deg)}
+  55%,100%{transform:translateX(430%) rotate(14deg)}}
+@media (prefers-reduced-motion:reduce){
+  .cta{animation:none} .rolar svg{animation:none} html{scroll-behavior:auto}
+}
+.pe-cta{font-size:12.5px;color:#8E96A1;letter-spacing:-.01em}
+.cta.morto{filter:grayscale(.15)}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CELULAR — não é a mesma tela encolhida. A folha vira tela cheia, os cartões
+   empilham, a torneira fica mais baixa e o antes/depois vira coluna.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width:760px){
+  .tela{padding:0 0 var(--doca);gap:0;min-height:100svh}
+  /* o aulão é card, não folha sangrada: precisa de margem lateral */
+  #sec-aulao{padding:0 0 clamp(22px,4vh,36px)}
+  .tela.claro,.tela.escuro{padding:14px 16px calc(var(--doca) + 20px)}
+  #sec-antes{padding:14px 16px calc(var(--doca) + 20px);gap:16px;
+    justify-content:flex-start}
+  .folha{width:100%;border-radius:0}
+
+  .duo{grid-template-columns:1fr;gap:14px}
+  .seta{justify-self:center;transform:rotate(90deg)}
+
+  /* a calculadora mora DENTRO de um iPhone — pedido dela. */
+  /* ⛔ 02/11 — ERA AQUI QUE O MOCKUP ENCOLHIA. Esta regra prendia o aparelho em
+     288px no celular «pra parte 2 caber inteira sem rolar». Ela pediu o mockup
+     MAIOR, e caber na tela custava 86px de aparelho. Rolar um pouco é o preço, e
+     é o preço certo: a calculadora é pra ler. 288 → 374 (escala 0,70 → 0,92). */
+  .moldura{padding:6px;border-radius:32px}
+  .lente{inset:6px;border-radius:27px}
+
+  .oferta{gap:18px}
+}
+@media (max-width:420px){
+    .perg{font-size:18px}
+}
+/* celular deitado: a folha não cabe em pé — deixa rolar em vez de espremer */
+@media (max-height:520px) and (orientation:landscape){
+  .folha{height:auto;min-height:100svh}
+  .arte{min-height:90px}
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PROVA VIVA — o que as ex-mentoradas falaram ao vivo no chat.
+
+   Mora DENTRO de `.tela.escuro`, logo abaixo do primeiro botão. Cada cartão é
+   uma captura de conversa: cabeçalho de chat, bolha, avatar e hora. A forma já
+   diz que foi ao vivo — por isso o cartão é claro sobre a seção escura.
+   ══════════════════════════════════════════════════════════════════════════ */
+.provaviva{width:100%;margin:26px 0 18px}
+.provaviva header{margin-bottom:14px}
+.provaviva .aovivo{display:inline-flex;align-items:center;gap:7px;
+  background:#FF3B30;color:#fff;border-radius:999px;padding:4px 11px 4px 9px;
+  font-family:var(--sfd);font-weight:800;font-size:10.5px;letter-spacing:.08em;
+  text-transform:uppercase}
+.provaviva .aovivo i{width:6px;height:6px;border-radius:50%;background:#fff;
+  animation:pvpulsa 1.6s ease-in-out infinite}
+@keyframes pvpulsa{0%,100%{opacity:1}50%{opacity:.28}}
+.provaviva h3{font-family:var(--sfd);font-weight:800;font-size:clamp(19px,3.1vh,25px);
+  line-height:1.16;letter-spacing:-.028em;margin-top:9px;color:#fff}
+.provaviva header p{font-size:12.5px;line-height:1.45;color:#8E96A1;
+  letter-spacing:-.01em;margin-top:6px}
+
+/* ── o palco: tira que desliza, com as setas por cima ── */
+.pv-palco{position:relative}
+.pv-tira{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;padding:2px 0 4px;
+  scrollbar-width:none;-ms-overflow-style:none;
+  /* ⚠️ a tira sangra até a borda da tela pra o próximo cartão «espiar» — é esse
+     pedaço cortado que faz a pessoa entender que tem mais pro lado */
+  margin:0 -16px;padding-left:16px;padding-right:16px;
+  /* ⚠️ SEM `scroll-padding-left` o snap para em 16px, nunca em 0: ele alinha o
+     cartão com a borda da ÁREA DE CONTEÚDO, que o padding da sangria empurrou.
+     Medido: a tira nascia em scrollLeft=16, então a seta da esquerda nascia
+     acesa e a dica «arrasta pro lado» se dava por cumprida e sumia sozinha. */
+  scroll-padding-left:16px}
+.pv-tira::-webkit-scrollbar{display:none}
+
+/* ⚠️ snap no INÍCIO, não no centro: centralizado, o 1º cartão nunca encostava
+   na borda esquerda (voltava pra 111px) e a tira parecia desalinhada. */
+.pv-card{flex:0 0 auto;width:min(284px,78vw);scroll-snap-align:start;
+  background:#fff;border-radius:18px;overflow:hidden;color:#000;
+  box-shadow:0 10px 26px rgba(0,0,0,.34)}
+.pv-barra{display:flex;align-items:center;gap:8px;padding:11px 13px 10px;
+  background:#F7F7FA;border-bottom:1px solid rgba(0,0,0,.08)}
+.pv-barra .mini{display:inline-flex;align-items:center;gap:5px;background:#FF3B30;
+  color:#fff;border-radius:999px;padding:3px 8px 3px 6px;
+  font-family:var(--sfd);font-weight:800;font-size:8.5px;letter-spacing:.07em}
+.pv-barra .mini i{width:5px;height:5px;border-radius:50%;background:#fff}
+.pv-barra b{font-family:var(--sfd);font-weight:700;font-size:12px;letter-spacing:-.02em;
+  color:#1C1C1E}
+.pv-barra b span{display:block;font-weight:400;font-size:10px;color:#8E8E93;margin-top:1px}
+
+.pv-corpo{padding:14px 14px 13px;display:flex;flex-direction:column;
+  /* altura igual em todos: senão os cartões ficam em degrau ao deslizar */
+  min-height:246px}
+.pv-nome{font-size:11px;font-weight:600;color:#6C6C70;margin:0 0 7px 9px;
+  letter-spacing:-.01em}
+/* ⚠️ a seção é centralizada; sem isto a bolha herdava o centro e a fala saía
+   alinhada no meio — bolha de conversa nenhuma é assim. */
+.pv-card,.provaviva header{text-align:left}
+.pv-bolha{background:#E9E9EB;border-radius:17px;padding:12px 14px;
+  font-size:14.5px;line-height:1.37;letter-spacing:-.012em;color:#000}
+.pv-bolha + .pv-bolha{margin-top:6px;font-size:13px;color:#3C3C43}
+.pv-assina{display:flex;align-items:center;gap:9px;margin-top:auto;padding-top:12px}
+.pv-av{width:28px;height:28px;border-radius:50%;flex:0 0 auto;display:grid;
+  place-items:center;font-family:var(--sfd);font-weight:800;font-size:12.5px;color:#fff}
+.pv-hora{font-size:10.5px;color:#8E8E93;letter-spacing:-.008em}
+
+/* ── as setas: ela pediu. Flutuam nas bordas e somem no fim da tira ── */
+/* ⛔ AS SETAS NÃO FLUTUAM MAIS SOBRE OS CARTÕES. Medido em 390px: o botão de
+   38px por cima da bolha comia palavras inteiras da fala — a prova que a
+   seção existe pra mostrar. Agora são controle no pé, ao lado dos pontinhos. */
+.pv-setas{display:flex;gap:8px}
+.pv-seta{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.18);
+  display:grid;place-items:center;background:rgba(255,255,255,.10);color:#fff;
+  cursor:pointer;transition:opacity .2s,transform .12s,background .2s;
+  -webkit-tap-highlight-color:transparent}
+.pv-seta svg{width:18px;height:18px}
+.pv-seta:active{transform:scale(.9);background:rgba(255,255,255,.2)}
+.pv-seta[disabled]{opacity:.26;pointer-events:none}
+
+/* ── pé: pontinhos + a dica de arrastar ── */
+.pv-pe{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.pv-pontos{display:flex;gap:6px}
+.pv-pontos i{width:6px;height:6px;border-radius:50%;background:#4A5260;
+  transition:background .2s,width .2s}
+.pv-pontos i.on{background:#fff;width:18px;border-radius:99px}
+.pv-arrasta{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;margin-top:9px;
+  color:#8E96A1;letter-spacing:-.01em;transition:opacity .3s}
+.pv-arrasta svg{width:14px;height:14px;animation:pvmao 1.9s ease-in-out infinite}
+@keyframes pvmao{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
+.pv-arrasta.sumiu{opacity:0}
+
+/* ── o segundo botão, embaixo da prova ── */
+.cta.cta2{margin-top:18px}
+
+@media (prefers-reduced-motion:reduce){
+  .provaviva .aovivo i,.pv-arrasta svg{animation:none}
+  .pv-tira{scroll-behavior:auto}
+}
+/* o 2º botão não tem subtítulo: sem o <small>, o padding de baixo fica sobrando */
+.cta.cta2{padding-top:18px;padding-bottom:18px}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SÓ-OFERTA — esta página não tem doca nem as outras seções.
+   ⚠️ O `.tela` reserva `var(--doca)` no padding de baixo pra barra do rodapé.
+   Sem doca, isso vira um buraco de 62px depois do último botão.
+   ⚠️ E `min-height:100svh` não serve aqui: a página é UMA seção só e cresce
+   com o conteúdo — forçar a altura da janela só cria vazio.
+   ══════════════════════════════════════════════════════════════════════════ */
+body.so-oferta{--doca:0px}
+body.so-oferta .tela{min-height:0;padding-bottom:26px}
+body.so-oferta .tela.escuro{padding:14px 16px 30px}
